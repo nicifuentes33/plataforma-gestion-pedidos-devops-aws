@@ -1,0 +1,32 @@
+
+# Dependencias
+node_modules/
+
+# Variables de entorno y credenciales
+.env
+.env.*
+!.env.example
+
+# Archivos de registro
+*.log
+npm-debug.log*
+
+# Archivos temporales
+*.tmp
+*.bak
+*.zip
+
+# AWS
+.aws-sam/
+.aws/
+samconfig.toml
+
+# Editor y sistema operativo
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Archivos de pruebas
+coverage/
+

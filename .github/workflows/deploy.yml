@@ -1,0 +1,52 @@
+
+name: Despliegue manual a AWS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Descargar codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Autenticacion AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Instalar SAM CLI
+        uses: aws-actions/setup-sam@v2
+
+      - name: Instalar dependencias
+        working-directory: backend
+        run: npm ci
+
+      - name: Ejecutar pruebas
+        working-directory: backend
+        run: npm test
+
+      - name: Construir aplicacion
+        run: sam build --template-file infraestructura/template.yaml
+
+      - name: Desplegar en AWS
+        run: |
+          sam deploy \
+            --stack-name pedidos-academico \
+            --resolve-s3 \
+            --capabilities CAPABILITY_IAM \
+            --no-confirm-changeset \
+            --no-fail-on-empty-changeset \
+            --parameter-overrides LabRoleArn=${{ secrets.AWS_LAB_ROLE_ARN }}

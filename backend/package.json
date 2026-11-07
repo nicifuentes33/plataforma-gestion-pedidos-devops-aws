@@ -1,0 +1,21 @@
+
+{
+  "name": "plataforma-gestion-pedidos",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API REST de pedidos adaptada desde Teletienda SOA para DevOps AWS",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "express": "^5.3.0",
+    "serverless-http": "^3.2.0",
+    "@aws-sdk/client-dynamodb": "^3.800.0",
+    "@aws-sdk/lib-dynamodb": "^3.800.0"
+  }
+}

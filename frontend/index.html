@@ -1,0 +1,253 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+  <title>Pedido Express</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="app.js"></script>
+</head>
+
+<body>
+
+<header>
+  <a class="logo" href="#menu">
+    PEDIDO <b>EXPRESS</b>
+  </a>
+
+  <nav>
+    <button id="abrirProductos" class="outline">
+      + Agregar producto
+    </button>
+
+    <button id="verPedidos" class="outline">
+      📋 Gestionar pedidos
+    </button>
+
+    <button id="abrirCarrito">
+      🛒 Carrito <span id="contador">0</span>
+    </button>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <div>
+      <small>RESTAURANTE · DOMICILIOS</small>
+      <h1>
+        Tu comida favorita,<br>
+        sin complicaciones.
+      </h1>
+      <p>
+        Escoge tus productos, confirma tu dirección
+        y sigue tu pedido.
+      </p>
+      <a href="#menu" class="heroLink">Ver menú</a>
+    </div>
+
+    <div class="heroIcon" aria-hidden="true">
+      🍽️
+    </div>
+  </section>
+
+  <section id="menu">
+    <div class="heading">
+      <div>
+        <small>NUESTRO MENÚ</small>
+        <h2>¿Qué deseas ordenar?</h2>
+      </div>
+    </div>
+
+    <div id="categorias" class="filters"></div>
+    <div id="catalogo" class="grid"></div>
+  </section>
+</main>
+
+<!-- CARRITO -->
+<aside id="carrito" class="drawer" aria-label="Mi carrito">
+  <div class="drawerhead">
+    <h2>Mi pedido</h2>
+    <button id="cerrarCarrito" class="plain">✕</button>
+  </div>
+
+  <div id="items" class="drawercontent"></div>
+
+  <div class="drawerfoot">
+    <div class="total">
+      <span>Total</span>
+      <strong id="total">$0</strong>
+    </div>
+
+    <form id="formPedido">
+      <label>
+        Nombre del cliente
+        <input
+          name="nombre"
+          maxlength="80"
+          placeholder="Escribe aquí tu nombre"
+          required
+        >
+      </label>
+
+      <label>
+        Teléfono
+        <input name="telefono" maxlength="30" required>
+      </label>
+
+      <label>
+        Dirección de envío
+        <input name="direccion" maxlength="200" required>
+      </label>
+
+      <button type="submit">Confirmar pedido</button>
+    </form>
+
+    <p id="mensajePedido" role="status"></p>
+  </div>
+</aside>
+
+<div id="oscurecer" class="overlay" hidden></div>
+
+<!-- AGREGAR PRODUCTOS -->
+<dialog id="modalProducto">
+  <form id="formProducto">
+    <div class="modalhead">
+      <h2>Nuevo producto</h2>
+      <button
+        type="button"
+        id="cerrarProducto"
+        class="plain"
+      >✕</button>
+    </div>
+
+    <label>
+      Nombre
+      <input name="nombre" maxlength="80" required>
+    </label>
+
+    <label>
+      Descripción
+      <textarea name="descripcion" maxlength="200"></textarea>
+    </label>
+
+    <label>
+      Precio (COP)
+      <input
+        type="number"
+        name="precio"
+        min="1"
+        step="1"
+        required
+      >
+    </label>
+
+    <label>
+      Categoría
+      <select name="categoria">
+        <option>Entradas</option>
+        <option>Plato fuerte</option>
+        <option>Bebidas</option>
+        <option>Postres</option>
+        <option>Otros</option>
+      </select>
+    </label>
+
+    <label>
+      Presentación del producto
+      <select id="tipoVisual">
+        <option value="imagen">Imagen por URL</option>
+        <option value="emoji">Emoji</option>
+        <option value="ninguno">Sin imagen</option>
+      </select>
+    </label>
+
+    <label id="filaImagen">
+      URL de imagen
+      <input
+        type="url"
+        name="imagenUrl"
+        placeholder="https://ejemplo.com/comida.jpg"
+      >
+    </label>
+
+    <label id="filaEmoji" hidden>
+      Emoji
+      <input
+        name="emoji"
+        placeholder="🍔"
+        maxlength="8"
+      >
+    </label>
+
+    <button type="submit">Guardar producto</button>
+    <p id="mensajeProducto" role="status"></p>
+  </form>
+</dialog>
+
+<!-- PANEL ADMINISTRATIVO DE PEDIDOS -->
+<dialog id="modalPedidos" class="admin">
+  <div class="modalhead">
+    <div>
+      <small>ADMINISTRACIÓN</small>
+      <h2>Gestión de pedidos</h2>
+    </div>
+
+    <button
+      type="button"
+      id="cerrarPedidos"
+      class="plain"
+    >✕</button>
+  </div>
+
+  <div class="toolbar">
+    <label>
+      Buscar pedido o cliente
+      <input
+        id="buscarPedido"
+        placeholder="Número, cliente o teléfono"
+      >
+    </label>
+
+    <label>
+      Estado
+      <select id="filtroEstado">
+        <option value="">Todos</option>
+        <option>Pendiente</option>
+        <option>En Proceso</option>
+        <option>Enviado</option>
+        <option>Entregado</option>
+      </select>
+    </label>
+
+    <label>
+      Orden
+      <select id="ordenPedidos">
+        <option value="desc">Más recientes</option>
+        <option value="asc">Más antiguos</option>
+      </select>
+    </label>
+
+    <button
+      type="button"
+      id="recargarPedidos"
+      class="outline"
+    >
+      Actualizar
+    </button>
+  </div>
+
+  <div id="resumenPedidos" class="resumen"></div>
+  <div id="listaPedidos" class="listaPedidos"></div>
+
+  <p id="mensajeAdmin" role="status"></p>
+</dialog>
+
+<footer>
+  Pedido Express · Plataforma de gestión de pedidos ·
+  Proyecto académico
+</footer>
+
+</body>
+</html>

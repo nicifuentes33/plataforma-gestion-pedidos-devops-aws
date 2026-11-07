@@ -1,0 +1,74 @@
+
+AWSTemplateFormatVersion: '2010-09-09'
+
+Transform: AWS::Serverless-2016-10-31
+
+Description: >
+  API REST de gestion de pedidos
+  con Lambda, API Gateway y DynamoDB
+
+Parameters:
+  LabRoleArn:
+    Type: String
+    Description: >
+      ARN de un rol existente autorizado
+      para ejecutar AWS Lambda
+
+Resources:
+
+  PedidosTabla:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+
+  ApiPedidos:
+    Type: AWS::Serverless::HttpApi
+
+  PedidosLambda:
+    Type: AWS::Serverless::Function
+
+    Properties:
+      Runtime: nodejs22.x
+      Handler: lambda.handler
+      CodeUri: ../backend/
+
+      MemorySize: 128
+      Timeout: 10
+
+      Role: !Ref LabRoleArn
+
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref PedidosTabla
+
+      Events:
+
+        AnyRoute:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ApiPedidos
+            Path: /{proxy+}
+            Method: ANY
+
+        Root:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ApiPedidos
+            Path: /
+            Method: GET
+
+Outputs:
+
+  ApiUrl:
+    Description: URL publica de la API
+
+    Value: !Sub >
+      https://${ApiPedidos}.execute-api.${AWS::Region}.amazonaws.com
