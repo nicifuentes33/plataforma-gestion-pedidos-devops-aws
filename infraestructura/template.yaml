@@ -1,25 +1,55 @@
-
 AWSTemplateFormatVersion: '2010-09-09'
 
 Transform: AWS::Serverless-2016-10-31
 
 Description: >
-  API REST de gestion de pedidos
-  con Lambda, API Gateway y DynamoDB
+  Infraestructura como codigo para Pedido Express.
+  API REST de gestion de pedidos utilizando
+  AWS Lambda, API Gateway HTTP y Amazon DynamoDB.
 
+Metadata:
+  com.aws.cloudformation.Context:
+    arch: >-
+      Cliente HTTP -> API Gateway HTTP ->
+      AWS Lambda -> Amazon DynamoDB.
+      La funcion procesa las operaciones
+      REST de pedidos y productos.
 Parameters:
+
   LabRoleArn:
     Type: String
     Description: >
-      ARN de un rol existente autorizado
-      para ejecutar AWS Lambda
+      ARN del rol IAM existente autorizado
+      para ejecutar AWS Lambda.
+
+  FrontendOrigin:
+    Type: String
+    Default: 'http://localhost:3000'
+    Description: >
+      Origen autorizado del frontend.
+      En produccion utilizar el dominio HTTPS
+      real de AWS Amplify, sin barra final.
 
 Resources:
 
   PedidosTabla:
     Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: >-
+          Almacenar los pedidos y permitir
+          su consulta y actualizacion
+          mediante la API REST.
+
     Properties:
       BillingMode: PAY_PER_REQUEST
+
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
 
       AttributeDefinitions:
         - AttributeName: id
@@ -31,10 +61,50 @@ Resources:
 
   ApiPedidos:
     Type: AWS::Serverless::HttpApi
+  ApiPedidos:
+    Type: AWS::Serverless::HttpApi
+
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: >-
+          Exponer los endpoints HTTP de
+          pedidos y productos hacia Lambda.
+
+    Properties:
+      StageName: '$default'
+    Properties:
+      StageName: '$default'
+
+      CorsConfiguration:
+        AllowOrigins:
+          - !Ref FrontendOrigin
+
+        AllowHeaders:
+          - content-type
+
+        AllowMethods:
+          - GET
+          - POST
+          - PATCH
+          - DELETE
+          - OPTIONS
+
+        AllowCredentials: false
 
   PedidosLambda:
     Type: AWS::Serverless::Function
+  PedidosLambda:
+    Type: AWS::Serverless::Function
 
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: >-
+          Ejecutar el backend Node.js de
+          Pedido Express y procesar las
+          solicitudes recibidas desde API Gateway.
+
+    Properties:
+      Runtime: nodejs22.x
     Properties:
       Runtime: nodejs22.x
       Handler: lambda.handler
@@ -57,6 +127,7 @@ Resources:
             ApiId: !Ref ApiPedidos
             Path: /{proxy+}
             Method: ANY
+            PayloadFormatVersion: '2.0'
 
         Root:
           Type: HttpApi
@@ -64,11 +135,19 @@ Resources:
             ApiId: !Ref ApiPedidos
             Path: /
             Method: GET
+            PayloadFormatVersion: '2.0'
 
 Outputs:
 
   ApiUrl:
-    Description: URL publica de la API
+    Description: URL base de la API REST
+    Value: !Sub 'https://${ApiPedidos}.execute-api.${AWS::Region}.${AWS::URLSuffix}'
 
-    Value: !Sub >
-      https://${ApiPedidos}.execute-api.${AWS::Region}.amazonaws.com
+  DynamoDBTable:
+    Description: Nombre de la tabla DynamoDB
+    Value: !Ref PedidosTabla
+
+  LambdaFunction:
+    Description: Nombre de la funcion Lambda
+    Value: !Ref PedidosLambda
+
