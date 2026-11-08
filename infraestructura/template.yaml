@@ -1,3 +1,4 @@
+
 AWSTemplateFormatVersion: '2010-09-09'
 
 Transform: AWS::Serverless-2016-10-31
@@ -12,8 +13,9 @@ Metadata:
     arch: >-
       Cliente HTTP -> API Gateway HTTP ->
       AWS Lambda -> Amazon DynamoDB.
-      La funcion procesa las operaciones
-      REST de pedidos y productos.
+      Lambda procesa las operaciones REST
+      de pedidos y productos.
+
 Parameters:
 
   LabRoleArn:
@@ -27,8 +29,8 @@ Parameters:
     Default: 'http://localhost:3000'
     Description: >
       Origen autorizado del frontend.
-      En produccion utilizar el dominio HTTPS
-      real de AWS Amplify, sin barra final.
+      En el despliegue utilizar el dominio
+      HTTPS real de AWS Amplify.
 
 Resources:
 
@@ -61,17 +63,14 @@ Resources:
 
   ApiPedidos:
     Type: AWS::Serverless::HttpApi
-  ApiPedidos:
-    Type: AWS::Serverless::HttpApi
 
     Metadata:
       com.aws.cloudformation.Context:
         why: >-
-          Exponer los endpoints HTTP de
-          pedidos y productos hacia Lambda.
+          Exponer los endpoints HTTP
+          de pedidos y productos
+          mediante AWS Lambda.
 
-    Properties:
-      StageName: '$default'
     Properties:
       StageName: '$default'
 
@@ -93,18 +92,14 @@ Resources:
 
   PedidosLambda:
     Type: AWS::Serverless::Function
-  PedidosLambda:
-    Type: AWS::Serverless::Function
 
     Metadata:
       com.aws.cloudformation.Context:
         why: >-
-          Ejecutar el backend Node.js de
-          Pedido Express y procesar las
-          solicitudes recibidas desde API Gateway.
+          Ejecutar el backend Node.js
+          de Pedido Express y procesar
+          las solicitudes de API Gateway.
 
-    Properties:
-      Runtime: nodejs22.x
     Properties:
       Runtime: nodejs22.x
       Handler: lambda.handler
@@ -150,4 +145,3 @@ Outputs:
   LambdaFunction:
     Description: Nombre de la funcion Lambda
     Value: !Ref PedidosLambda
-
