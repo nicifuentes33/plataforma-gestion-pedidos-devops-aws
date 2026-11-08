@@ -1,4 +1,4 @@
-
+const API_BASE = "https://w3ubz2867h.execute-api.us-east-1.amazonaws.com";
 const $ = selector => document.querySelector(selector);
 
 const pesos = valor =>
@@ -23,8 +23,9 @@ let pedidos = [];
 
 const carrito = new Map();
 
+
 async function api(url, opciones = {}) {
-  const respuesta = await fetch(url, opciones);
+  const respuesta = await fetch(API_BASE + url, opciones);
 
   let datos;
 
@@ -42,6 +43,7 @@ async function api(url, opciones = {}) {
 
   return datos;
 }
+
 
 function jsonOptions(method, data) {
   return {
