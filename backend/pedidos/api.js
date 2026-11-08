@@ -11,9 +11,19 @@ const {
 
 const router = express.Router();
 
+
 router.post('/', async (req, res, next) => {
   try {
+    console.log('DIAGNOSTICO POST PEDIDOS:', {
+      contentType: req.headers['content-type'],
+      tipoBody: typeof req.body,
+      camposBody: Object.keys(req.body || {}),
+      tipoCliente: typeof req.body?.cliente,
+      camposCliente: Object.keys(req.body?.cliente || {})
+    });
+
     const error = comprobarPedido(req.body);
+
 
     if (error) {
       return res.status(400).json({ error });
